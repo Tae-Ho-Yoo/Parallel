@@ -25,13 +25,12 @@ __global__ void random_walk_kernel(float *map, int rows, int cols, int* bx, int*
   if (curridx < rows){
     bx[tid] = curridx;
   } else {
-    bx[tid] = curridx - rows;
+    bx[tid] = curridx % rows;
   }
   by[tid] = curridx / rows;
 
   for (int i = 0; i < steps; i++){
-    float randflo = curand_uniform(&state[tid]);
-    int randact = int(randflo * 4);
+    int randact = int(randval * 4);
 
     if (randact == 0){
       if (curridx + 1 < rows * cols){
@@ -55,8 +54,12 @@ __global__ void random_walk_kernel(float *map, int rows, int cols, int* bx, int*
     }
     if (map[curridx] > max_height){
       max_height = map[curridx];
-      bx[tid] = curridx - rows;
-      by[tid] = curridx / rows; 
+      if (curridx < rows){
+        bx[tid] = curridx;
+      } else {
+        bx[tid] = curridx % rows;
+      }
+      by[tid] = curridx / rows;
     }
   }
 }
