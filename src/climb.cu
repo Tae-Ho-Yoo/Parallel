@@ -4,8 +4,8 @@
 #include <curand_kernel.h>
 #include "utils.h"
 
-#define N_THREADS 1024
-#define N_BLOCKS 16
+#define N_THREADS 16
+#define N_BLOCKS 1024
 
 /*** GPU functions ***/
 __global__ void init_rand_kernel(curandState *state) {
@@ -48,6 +48,7 @@ __global__ void random_walk_kernel(float *map, int rows, int cols, int* bx, int*
         curridx -= rows;
       }
     }
+
     if (map[curridx] > max_height){
       max_height = map[curridx];
       bx[tid] = curridx % rows;
@@ -115,10 +116,9 @@ float random_walk(float* map, int rows, int cols, int steps) {
 
   for (int i = 0; i < N_BLOCKS * N_THREADS; i++){
     for (int j = 0; j < N_BLOCKS * N_THREADS; j++){
-      if ((rows * by[j] + bx[i]) < N_BLOCKS * N_THREADS){
-        if (map[rows * by[j] + bx[i]] > max_val){
-          max_val = map[rows * by[j] + bx[i]];
-        }
+      if (map[rows * by[i] + bx[j]] > max_val){
+        max_val = map[rows * by[i] + bx[j]];
+        printf("%f\n", max_val);
       }
     }
   }
